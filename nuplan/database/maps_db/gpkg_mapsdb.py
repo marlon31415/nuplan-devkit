@@ -81,7 +81,7 @@ class GPKGMapsDB(IMapsDB):
         self._seconds_between_attempts = SECONDS_BETWEEN_ATTEMPTS
 
         self._map_lock_dir = os.path.join(self._map_root, '.maplocks')
-        os.makedirs(self._map_lock_dir, exist_ok=True)
+        # os.makedirs(self._map_lock_dir, exist_ok=True)
 
         # Load map data to trigger automatic downloading.
         self._load_map_data()
