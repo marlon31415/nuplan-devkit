@@ -440,7 +440,7 @@ class SimulationTile:
             if len(selected_simulation_figure.ego_state_plot.data_sources):
                 chrome_options = webdriver.ChromeOptions()
                 chrome_options.headless = True
-                driver = webdriver.Chrome(chrome_options=chrome_options)
+                driver = webdriver.Chrome(options=chrome_options)
                 driver.set_window_size(1920, 1080)
                 shape = None
                 simulation_figure = self._create_initial_figure(
