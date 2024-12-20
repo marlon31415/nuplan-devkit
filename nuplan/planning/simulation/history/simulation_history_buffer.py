@@ -160,7 +160,7 @@ class SimulationHistoryBuffer:
 
     @staticmethod
     def initialize_from_scenario(
-        buffer_size: int, scenario: AbstractScenario, observation_type: Type[Observation]
+        buffer_size: int, scenario: AbstractScenario, observation_type: Type[Observation], iteration: Optional[int] = 0,
     ) -> SimulationHistoryBuffer:
         """
         Initializes ego_state_buffer and observations_buffer from scenario
@@ -177,10 +177,10 @@ class SimulationHistoryBuffer:
         else:
             raise ValueError(f"No matching observation type for {observation_type} for history!")
 
-        past_observation = list(observation_getter(iteration=0, time_horizon=buffer_duration, num_samples=buffer_size))
+        past_observation = list(observation_getter(iteration=iteration, time_horizon=buffer_duration, num_samples=buffer_size))
 
         past_ego_states = list(
-            scenario.get_ego_past_trajectory(iteration=0, time_horizon=buffer_duration, num_samples=buffer_size)
+            scenario.get_ego_past_trajectory(iteration=iteration, time_horizon=buffer_duration, num_samples=buffer_size)
         )
 
         return SimulationHistoryBuffer.initialize_from_list(
