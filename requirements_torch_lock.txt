@@ -66,10 +66,6 @@ google-auth==2.9.1 \
     # via
     #   google-auth-oauthlib
     #   tensorboard
-grpcio==1.47.0 \
-    --hash=sha256:5dbba95fab9b35957b4977b8904fc1fa56b302f9051eff4d7716ebb0c087f801 \
-    --hash=sha256:b821403907e865e8377af3eee62f0cb233ea2369ba0fcdce9505ca5bfaf4eeb3
-    # via tensorboard
 idna==3.3 \
     --hash=sha256:84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff \
     --hash=sha256:9d643ff0a55b762d5cdb124b8eaa99c66322e2157b69160bc32796e824360e6d
@@ -90,14 +86,6 @@ multidict==6.0.2 \
     # via
     #   aiohttp
     #   yarl
-numpy==1.23.1 \
-    --hash=sha256:a35c4e64dfca659fe4d0f1421fc0f05b8ed1ca8c46fb73d9e5a7f175f85696bb \
-    --hash=sha256:d748ef349bfef2e1194b59da37ed5a29c19ea8d7e6342019921ba2ba4fd8b624
-    # via
-    #   pytorch-lightning
-    #   tensorboard
-    #   torchmetrics
-    #   torchvision
 oauthlib==3.2.0 \
     --hash=sha256:23a8208d75b902797ea29fd31fa80a15ed9dc2c6c16fe73f5d346f83f6fa27a2 \
     --hash=sha256:6db33440354787f9b7f3a6dbd4febf5d0f93758354060e802f6c06cb493022fe
