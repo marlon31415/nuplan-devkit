@@ -102,3 +102,23 @@ exclude = [
 [tool.setuptools.package-data]
 "*" = ["*.json", "*.yaml", "*.yml"]
 
+[tool.uv]
+prerelease = "allow"
+
+[tool.uv.sources]
+torch = { index = "pytorch-stable" }
+torch-scatter = { index = "torch-1.9-cu111" }
+torchvision = { index = "pytorch-stable" }
+
+[[tool.uv.index]]
+name = "pytorch-stable"
+url = "https://download.pytorch.org/whl/torch_stable.html"
+format = "flat"
+explicit = true
+
+[[tool.uv.index]]
+name = "torch-1.9-cu111"
+url = "https://data.pyg.org/whl/torch-1.9.0+cu111.html"
+format = "flat"
+explicit = true
+
