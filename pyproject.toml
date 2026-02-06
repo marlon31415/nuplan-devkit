@@ -101,8 +101,11 @@ exclude = [
 
 [tool.setuptools.package-data]
 "*" = [
+    "*.css",
     "*.html",
+    "*.js",
     "*.json",
+    "*.png",
     "*.yaml",
     "*.yml"
 ]
