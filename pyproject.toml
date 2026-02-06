@@ -100,7 +100,12 @@ exclude = [
 ]
 
 [tool.setuptools.package-data]
-"*" = ["*.json", "*.yaml", "*.yml"]
+"*" = [
+    "*.html",
+    "*.json",
+    "*.yaml",
+    "*.yml"
+]
 
 [tool.uv]
 prerelease = "allow"
