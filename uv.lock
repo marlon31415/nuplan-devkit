@@ -3609,7 +3609,7 @@ requires-dist = [
     { name = "pillow", specifier = ">=9.2.0" },
     { name = "pre-commit", specifier = ">=4.3.0" },
     { name = "psutil", specifier = ">=7.2.2" },
-    { name = "pyarrow", specifier = ">=21.0.0" },
+    { name = "pyarrow", specifier = ">=9.0.0" },
     { name = "pyinstrument", specifier = ">=5.1.2" },
     { name = "pyogrio", specifier = ">=0.11.1" },
     { name = "pyquaternion", specifier = ">=0.9.5" },
