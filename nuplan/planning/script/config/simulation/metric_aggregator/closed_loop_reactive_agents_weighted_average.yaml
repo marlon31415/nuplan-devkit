@@ -8,6 +8,7 @@ closed_loop_reactive_agents_weighted_average:
     time_to_collision_within_bound: 5.0 # This metric has the highest weight equal to 5.0 in the weighted average function, its base score can be 0 or 1 depending on the minimum time to collision threshold
     speed_limit_compliance: 4.0 # This metric has a weight equal to 4.0 in the weighted average function, its base score can take a value in [0,1] depending on the amount and duration of over-speeding
     ego_is_comfortable: 2.0 # This metric has the lowest weight equal to 2.0 in the weighted average function, its base score can be 0 or 1 depending on the comfort thresholds on acceleration, jerk and yaw.
+    navigation_compliance: 0 # Excluded from original aggregator (used in separate nav aggregator only)
     default: 1.0
   file_name: closed_loop_reactive_agents_weighted_average_metrics_${now:${date_format}}
   # The scenario score is defined as the weighted average score of the metrics listed above, multiplied by the score of the multiple_metrics below.

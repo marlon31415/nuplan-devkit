@@ -8,3 +8,4 @@ defaults:
   - override /simulation_metric: simulation_closed_loop_reactive_agents
   - override /metric_aggregator:
       - closed_loop_reactive_agents_weighted_average
+      - closed_loop_reactive_agents_nav_weighted_average

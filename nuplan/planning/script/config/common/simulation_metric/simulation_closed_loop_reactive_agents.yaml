@@ -17,3 +17,4 @@ defaults:
       - ego_is_comfortable_statistics
       - ego_is_making_progress_statistics
       - driving_direction_compliance_statistics
+      - navigation_compliance_statistics
