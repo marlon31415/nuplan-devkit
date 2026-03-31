@@ -1,0 +1,17 @@
+closed_loop_reactive_agents_nav_weighted_average:
+  _target_: nuplan.planning.metrics.aggregator.weighted_average_metric_aggregator.WeightedAverageMetricAggregator
+  name: 'closed_loop_reactive_agents_nav_weighted_average'
+  metric_weights:
+    ego_progress_along_expert_route: 5.0
+    time_to_collision_within_bound: 5.0
+    speed_limit_compliance: 4.0
+    ego_is_comfortable: 2.0
+    default: 1.0
+  file_name: closed_loop_reactive_agents_nav_weighted_average_metrics_${now:${date_format}}
+  multiple_metrics:
+    - no_ego_at_fault_collisions
+    - drivable_area_compliance
+    - ego_is_making_progress
+    - driving_direction_compliance
+    - navigation_compliance  # Navigation compliance as multiplicative factor
+  challenge_name: closed_loop_reactive_agents

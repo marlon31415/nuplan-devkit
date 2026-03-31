@@ -1,0 +1,6 @@
+navigation_compliance_statistics:
+  _target_: nuplan.planning.metrics.evaluation_metrics.common.navigation_compliance.NavigationComplianceStatistics
+  _convert_: 'all'
+  name: 'navigation_compliance'
+  category: 'Planning'
+  metric_score_unit: 'bool'
