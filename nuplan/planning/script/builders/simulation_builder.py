@@ -69,6 +69,18 @@ def build_simulations(
     )
     scenarios = scenario_filter.get_scenarios()
 
+    # Optional: replace each scenario with its alternative routes (nucontrol-devkit). Gated behind
+    # an env var so default behavior is unchanged when it is unset. Each scenario whose token has
+    # alternatives becomes one rerouted proxy per alternative (uniquely named so outputs do not
+    # collide); scenarios with no alternative are dropped (alternatives-only comparison).
+    alt_routes_jsonl = os.environ.get("NUCONTROL_ALT_ROUTES_JSONL")
+    if alt_routes_jsonl:
+        from nucontrol.simulation_expand import expand_scenarios_with_alternatives
+
+        logger.info('Expanding scenarios with alternative routes from %s ...', alt_routes_jsonl)
+        scenarios = expand_scenarios_with_alternatives(scenarios, alt_routes_jsonl)
+        logger.info('Alternative-route expansion produced %d simulation(s).', len(scenarios))
+
     metric_engines_map = {}
     if cfg.run_metric:
         logger.info('Building metric engines...')
