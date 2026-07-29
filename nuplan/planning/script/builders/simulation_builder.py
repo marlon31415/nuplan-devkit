@@ -135,10 +135,17 @@ def build_simulations(
                 scenario=scenario,
             )
 
+            # Under nucontrol alternative routing (gated by NUCONTROL_ALT_ROUTES_JSONL), also end the
+            # simulation when the ego reaches the longitudinal end of the mapped road. This env var is
+            # read here on the driver, where the export is guaranteed present, and passed as a bool
+            # into Simulation so it rides along in the pickle to the Ray workers (see __reduce__).
+            end_at_map_edge = bool(os.environ.get("NUCONTROL_ALT_ROUTES_JSONL"))
+
             simulation = Simulation(
                 simulation_setup=simulation_setup,
                 callback=MultiCallback(callbacks + stateful_callbacks),
                 simulation_history_buffer_duration=cfg.simulation_history_buffer_duration,
+                end_at_map_edge=end_at_map_edge,
             )
             simulations.append(SimulationRunner(simulation, planner))
 
