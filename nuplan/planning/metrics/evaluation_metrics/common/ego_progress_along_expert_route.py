@@ -13,6 +13,7 @@ from nuplan.planning.metrics.utils.route_extractor import (
     get_distance_of_closest_baseline_point_to_its_start,
     get_route,
     get_route_baseline_roadblock_linkedlist,
+    get_route_baseline_roadblock_linkedlist_from_ids,
     get_route_simplified,
 )
 from nuplan.planning.metrics.utils.state_extractors import extract_ego_center, extract_ego_time_point
@@ -20,6 +21,19 @@ from nuplan.planning.scenario_builder.abstract_scenario import AbstractScenario
 from nuplan.planning.simulation.history.simulation_history import SimulationHistory
 
 logger = logging.getLogger(__name__)
+
+# Alternative-route progress reference (nucontrol). Alternative routes have no expert (logged-human)
+# trajectory, so the ego's progress along the alt route is compared against a synthetic reference
+# derived from the route's planned goal distance: reference = goal_distance_m * FRACTION * (window / REF).
+# The fraction is the only knob; it scales linearly with the eval window so a shorter sim expects
+# proportionally less progress (60 s -> x0.5, 15 s -> x0.125). See ModifiedRoutingScenario.alt_goal_distance_m.
+ALT_GOAL_PROGRESS_FRACTION = 0.5
+ALT_REFERENCE_WINDOW_S = 60.0
+
+
+def alt_reference_progress_m(goal_distance_m: float, window_s: float) -> float:
+    """Synthetic reference ego-progress [m] for an alternative route over an eval window of ``window_s``."""
+    return goal_distance_m * ALT_GOAL_PROGRESS_FRACTION * (window_s / ALT_REFERENCE_WINDOW_S)
 
 
 class PerFrameProgressAlongRouteComputer:
@@ -196,6 +210,72 @@ class EgoProgressAlongExpertRouteStatistics(MetricBase):
         """
         ego_states = history.extract_ego_state
         ego_poses = extract_ego_center(ego_states)
+
+        # Alternative-route path (nucontrol): alt routes have no expert (logged-human) trajectory, so
+        # measure the ego's progress along the ALTERNATIVE route (its own roadblock chain) and compare
+        # it against a synthetic reference derived from the route's planned goal distance. Gated on the
+        # scenario carrying alt_goal_distance_m; a plain nuPlan scenario returns None here and falls
+        # through to the unchanged expert-based computation below.
+        alt_goal_distance_m = getattr(scenario, "alt_goal_distance_m", None)
+        if alt_goal_distance_m is not None:
+            alt_route = get_route_baseline_roadblock_linkedlist_from_ids(
+                history.map_api, scenario.get_route_roadblock_ids()
+            )
+            if alt_route.head is not None:
+                ego_progress = PerFrameProgressAlongRouteComputer(route_roadblocks=alt_route)(
+                    ego_poses=ego_poses
+                )
+                overall_ego_progress = np.sum(ego_progress)
+                # Full configured eval window (not the possibly early-stopped history), so truncation
+                # does not shrink the reference.
+                window_s = scenario.get_number_of_iterations() * scenario.database_interval
+                reference_progress = alt_reference_progress_m(float(alt_goal_distance_m), window_s)
+
+                # Same ratio logic as the expert path, with the synthetic reference as denominator.
+                if overall_ego_progress < -self._score_progress_threshold:
+                    ego_expert_progress_along_route_ratio = 0
+                else:
+                    ego_expert_progress_along_route_ratio = min(
+                        1.0,
+                        max(overall_ego_progress, self._score_progress_threshold)
+                        / max(reference_progress, self._score_progress_threshold),
+                    )
+
+                ego_timestamps = extract_ego_time_point(ego_states)
+                time_series = TimeSeries(
+                    unit='meters', time_stamps=list(ego_timestamps), values=list(ego_progress)
+                )
+                # Keep the statistic names/order identical to the expert path (ratio last) so
+                # ego_is_making_progress and the CSV schema are unchanged; expert_total_progress_along_route
+                # carries the synthetic reference here.
+                statistics = [
+                    Statistic(
+                        name='expert_total_progress_along_route',
+                        unit='meters',
+                        value=float(reference_progress),
+                        type=MetricStatisticsType.VALUE,
+                    ),
+                    Statistic(
+                        name='ego_total_progress_along_route',
+                        unit='meters',
+                        value=float(overall_ego_progress),
+                        type=MetricStatisticsType.VALUE,
+                    ),
+                    Statistic(
+                        name='ego_expert_progress_along_route_ratio',
+                        unit=MetricStatisticsType.RATIO.unit,
+                        value=ego_expert_progress_along_route_ratio,
+                        type=MetricStatisticsType.RATIO,
+                    ),
+                ]
+                self.results = self._construct_metric_results(
+                    metric_statistics=statistics,
+                    scenario=scenario,
+                    time_series=time_series,
+                    metric_score_unit=self.metric_score_unit,
+                )
+                return self.results
+            # Unresolvable alt chain (empty linked list): fall through to the expert-based path.
 
         expert_states = scenario.get_expert_ego_trajectory()
         expert_poses = extract_ego_center(expert_states)

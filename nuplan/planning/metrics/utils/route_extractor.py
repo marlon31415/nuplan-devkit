@@ -239,6 +239,46 @@ def get_route_baseline_roadblock_linkedlist(
     return route_baseline_roadblock_list
 
 
+def get_route_baseline_roadblock_linkedlist_from_ids(
+    map_api: AbstractMap, roadblock_ids: List[str]
+) -> RouteRoadBlockLinkedList:
+    """Build a RouteRoadBlockLinkedList directly from an ordered roadblock-id chain.
+
+    Unlike :func:`get_route_baseline_roadblock_linkedlist`, which reconstructs the route from expert
+    poses, this takes an already-known ordered chain (e.g. a nucontrol alternative route's
+    ``route_ids``, which alternate ``ROADBLOCK`` / ``ROADBLOCK_CONNECTOR``) and uses the first interior
+    lane's baseline of each roadblock as its representative baseline — mirroring the pair construction
+    of that function. Ids that do not resolve, or roadblocks without interior edges, are skipped.
+
+    :param map_api: Corresponding map.
+    :param roadblock_ids: Ordered roadblock/roadblock-connector ids describing the route.
+    :return A linked list of RouteBaselineRoadBlockPair.
+    """
+    route_baseline_roadblock_list = RouteRoadBlockLinkedList()
+    prev_route_baseline_roadblock: Optional[RouteBaselineRoadBlockPair] = None
+
+    for roadblock_id in roadblock_ids:
+        road_block = map_api.get_map_object(
+            roadblock_id, SemanticMapLayer.ROADBLOCK
+        ) or map_api.get_map_object(roadblock_id, SemanticMapLayer.ROADBLOCK_CONNECTOR)
+        if road_block is None or not road_block.interior_edges:
+            continue
+        ref_baseline_path = road_block.interior_edges[0].baseline_path
+
+        if route_baseline_roadblock_list.head is None:
+            prev_route_baseline_roadblock = RouteBaselineRoadBlockPair(
+                base_line=ref_baseline_path, road_block=road_block
+            )
+            route_baseline_roadblock_list.head = prev_route_baseline_roadblock
+        else:
+            prev_route_baseline_roadblock.next = RouteBaselineRoadBlockPair(
+                base_line=ref_baseline_path, road_block=road_block
+            )
+            prev_route_baseline_roadblock = prev_route_baseline_roadblock.next
+
+    return route_baseline_roadblock_list
+
+
 def get_distance_of_closest_baseline_point_to_its_start(base_line: PolylineMapObject, pose: Point2D) -> float:
     """Computes distance of "closest point on the baseline to pose" to the beginning of the baseline
     :param base_line: A baseline path
